@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LeaveFlow – Employee Leave Management</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">🌴</span>
+      <div>
+        <h1>LeaveFlow</h1>
+        <p class="tagline">Employee Leave Management</p>
+      </div>
+    </div>
+    <nav class="role-switch" role="tablist" aria-label="Select view">
+      <button class="role-btn active" data-view="employee" role="tab" aria-selected="true">👤 Employee</button>
+      <button class="role-btn" data-view="manager" role="tab" aria-selected="false">🧑‍💼 Manager</button>
+    </nav>
+    <div class="topbar-actions">
+      <button id="themeToggle" class="icon-btn" title="Toggle dark mode" aria-label="Toggle dark mode">🌙</button>
+      <button id="resetData" class="btn btn-ghost" title="Restore sample data">↺ Reset demo data</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ================= EMPLOYEE VIEW ================= -->
+    <section id="employeeView" class="view active" aria-labelledby="empHeading">
+      <div class="view-header">
+        <div class="who">
+          <div class="avatar lg" id="empAvatar"></div>
+          <div>
+            <h2 id="empHeading">Welcome, <span id="empName">Employee</span></h2>
+            <p class="muted" id="empMeta"></p>
+          </div>
+        </div>
+        <label class="select-label">
+          Signed in as
+          <select id="employeeSelect" aria-label="Select employee"></select>
+        </label>
+      </div>
+
+      <div class="cards" id="balanceCards"></div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <h3>📝 Request Leave</h3>
+          <form id="leaveForm" novalidate>
+            <label>Leave type
+              <select id="leaveType" required></select>
+            </label>
+            <div class="row">
+              <label>Start date
+                <input type="date" id="startDate" required />
+              </label>
+              <label>End date
+                <input type="date" id="endDate" required />
+              </label>
+            </div>
+            <label class="checkbox">
+              <input type="checkbox" id="halfDay" /> Half day (single date only)
+            </label>
+            <label>Reason
+              <textarea id="reason" rows="3" maxlength="300" placeholder="Briefly describe the reason for your leave" required></textarea>
+            </label>
+            <div class="form-summary" id="daySummary">Select dates to see working days.</div>
+            <p class="form-error" id="formError" role="alert"></p>
+            <button type="submit" class="btn btn-primary">Submit request</button>
+          </form>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h3>📋 My Leave History</h3>
+            <select id="historyFilter" aria-label="Filter history by status">
+              <option value="all">All statuses</option>
+              <option value="Pending">Pending</option>
+              <option value="Approved">Approved</option>
+              <option value="Rejected">Rejected</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+          <div id="historyList" class="history-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= MANAGER VIEW ================= -->
+    <section id="managerView" class="view" aria-labelledby="mgrHeading">
+      <div class="view-header">
+        <div>
+          <h2 id="mgrHeading">Manager Dashboard</h2>
+          <p class="muted">Review, approve or reject team leave requests.</p>
+        </div>
+      </div>
+
+      <div class="cards stats" id="statCards"></div>
+
+      <div class="grid-2 wide-left">
+        <div class="panel">
+          <div class="panel-header wrap">
+            <h3>📥 Leave Requests</h3>
+            <div class="filters">
+              <div class="chip-group" id="statusFilter" role="group" aria-label="Filter by status">
+                <button class="chip active" data-status="all">All</button>
+                <button class="chip" data-status="Pending">Pending</button>
+                <button class="chip" data-status="Approved">Approved</button>
+                <button class="chip" data-status="Rejected">Rejected</button>
+                <button class="chip" data-status="Cancelled">Cancelled</button>
+              </div>
+              <div class="filter-row">
+                <input type="search" id="searchInput" placeholder="Search employee, type, reason…" aria-label="Search requests" />
+                <select id="deptFilter" aria-label="Filter by department"></select>
+              </div>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Type</th>
+                  <th>Dates</th>
+                  <th>Days</th>
+                  <th>Reason</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="requestTable"></tbody>
+            </table>
+          </div>
+          <p class="empty" id="tableEmpty" hidden>No requests match the current filters.</p>
+        </div>
+
+        <div class="side-stack">
+          <div class="panel">
+            <h3>📊 Approved Days by Leave Type</h3>
+            <div id="typeChart" class="bar-chart"></div>
+          </div>
+          <div class="panel">
+            <h3>🏖️ On Leave Today</h3>
+            <ul id="onLeaveToday" class="simple-list"></ul>
+          </div>
+          <div class="panel">
+            <h3>🗓️ Upcoming Approved Leave</h3>
+            <ul id="upcomingList" class="simple-list"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Decision modal -->
+  <div class="modal-backdrop" id="modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h3 id="modalTitle">Decision</h3>
+      <p id="modalBody" class="muted"></p>
+      <label>Manager comment (optional)
+        <textarea id="modalComment" rows="3" maxlength="200"></textarea>
+      </label>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="modalCancel" type="button">Cancel</button>
+        <button class="btn" id="modalConfirm" type="button">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <footer class="footer">Demo data is stored in your browser localStorage &middot; LeaveFlow demo</footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
